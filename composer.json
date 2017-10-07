@@ -1,0 +1,6 @@
+{
+    "name": "php-cocoabot",
+    "require": {
+        "ext-mbstring": "*"
+    }
+}
