@@ -1,7 +1,9 @@
 <?php
 require_once __DIR__ . '/constinfo.php';
 require_once __DIR__ . '/weather.php';
-
+/**
+ * Botクラス
+ */
 class Bot {
 
     private $accessToken;
@@ -53,7 +55,7 @@ class Bot {
             if ($this->message->{"text"} == '確認') {
                 $messageData = $this->getMessageData(1);
             }
-            // ボタンタイプ
+            // 検索
             else if ($this->message->{"text"} == '検索') {
                 $messageData = $this->getMessageData(2);
             }
@@ -65,9 +67,17 @@ class Bot {
             else if ($this->message->{"text"} == 'まあまあかな') {
                 $messageData = $this->getMessageData(4);
             }
-            // 今日と明日の天候情報（初期設定では金沢の天気を返す）
+            // 天気
             else if ($this->message->{"text"} == '天気') {
                 $messageData = $this->getMessageData(5);
+            }
+            // 今日と明日の天候情報:金沢
+            else if ($this->message->{"text"} == '金沢') {
+                $messageData = $this->getMessageData(6);
+            }
+            // 今日と明日の天候情報:東京
+            else if ($this->message->{"text"} == '東京') {
+                $messageData = $this->getMessageData(7);
             }
             // それ以外は送られてきたテキストをそのまま返す
             else {
@@ -178,7 +188,41 @@ class Bot {
                     ];
                     return $messageData;
                 case 5:
+                    $messageData = [
+                        'type' => 'template',
+                        'altText' => '天気',
+                        'template' => [
+                            'type' => 'buttons',
+                            'title' => 'Weather',
+                            'text' => '今日と明日の天候をチェック',
+                            'actions' => [
+                                [
+                                    'type' => 'message',
+                                    'label' => '金沢',
+                                    'text' => '金沢'
+                                ],
+                                [
+                                    'type' => 'message',
+                                    'label' => '東京',
+                                    'text' => '東京'
+                                ]
+                            ]
+                        ]
+                    ];
+                    return $messageData;
+                case 6:
                     $info = $this->weather->getWeather("金沢");
+                    $messageData = [
+                        'type' => 'text',
+                        'text' => $info[0]["datelabel"] . 'の' .
+                        $info["city"] . 'の天気は「' .
+                        $info[0]["weather"] . '」だね！  ' .
+                        $info[1]["datelabel"] . 'の天気は「' .
+                        $info[1]["weather"] . '」だって！'
+                    ];
+                    return $messageData;
+                case 7:
+                    $info = $this->weather->getWeather("東京");
                     $messageData = [
                         'type' => 'text',
                         'text' => $info[0]["datelabel"] . 'の' .

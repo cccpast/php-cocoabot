@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/constinfo.php';
-
+/**
+ * 天候情報ラッパークラス
+ */
 class Weather {
 
     private $baseUrl;
