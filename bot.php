@@ -1,9 +1,7 @@
 <?php
 require_once __DIR__ . '/constinfo.php';
 require_once __DIR__ . '/weather.php';
-/**
- * Botクラス
- */
+
 class Bot {
 
     private $accessToken;
@@ -11,11 +9,13 @@ class Bot {
     private $replayToken;
     private $response;
     private $weather;
+    private $hitWords;
 
     function __construct()
     {
         $this->accessToken = ConstInfo::ACCESS_TOKEN;
         $this->weather = new Weather();
+        $this->hitWords = ConstInfo::HIT_WORDS;
     }
 
     /**
@@ -51,39 +51,18 @@ class Bot {
     {
         try {
             $messageData;
-            // 確認ダイアログタイプ
-            if ($this->message->{"text"} == '確認') {
-                $messageData = $this->getMessageData(1);
+            $keyTemp = -1;
+            foreach ($this->hitWords as $key => $val) {
+                if ($this->message->{"text"} == $val) {
+                    $messageData = $this->getMessageData($key + 1);
+                    $keyTemp = $key;
+                    break;
+                }
             }
-            // 検索
-            else if ($this->message->{"text"} == '検索') {
-                $messageData = $this->getMessageData(2);
-            }
-            // 確認ダイアログの返答１
-            else if ($this->message->{"text"} == '元気だよ') {
-                $messageData = $this->getMessageData(3);
-            }
-            // 確認ダイアログの返答２
-            else if ($this->message->{"text"} == 'まあまあかな') {
-                $messageData = $this->getMessageData(4);
-            }
-            // 天気
-            else if ($this->message->{"text"} == '天気') {
-                $messageData = $this->getMessageData(5);
-            }
-            // 今日と明日の天候情報:金沢
-            else if ($this->message->{"text"} == '金沢') {
-                $messageData = $this->getMessageData(6);
-            }
-            // 今日と明日の天候情報:東京
-            else if ($this->message->{"text"} == '東京') {
-                $messageData = $this->getMessageData(7);
-            }
-            // それ以外は送られてきたテキストをそのまま返す
-            else {
+            if ($keyTemp === -1) {
                 $messageData = $this->getMessageData(99);
             }
-            // error_log(print_r($messageData, true));
+            error_log(print_r($messageData, true));
             $this->response = [
                 'replyToken' => $this->replyToken,
                 'messages' => [$messageData]
@@ -199,12 +178,12 @@ class Bot {
                                 [
                                     'type' => 'message',
                                     'label' => '金沢',
-                                    'text' => '金沢'
+                                    'text' => '金沢の天気は？'
                                 ],
                                 [
                                     'type' => 'message',
                                     'label' => '東京',
-                                    'text' => '東京'
+                                    'text' => '東京の天気は？'
                                 ]
                             ]
                         ]
