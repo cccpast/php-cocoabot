@@ -36,6 +36,7 @@ class Bot {
         try {
             $jsonString = file_get_contents('php://input');
             $jsonObj = json_decode($jsonString);
+            error_log(print_r($jsonObj, true));  // 送られてきたデータチェック
             $this->message = $jsonObj->{"events"}[0]->{"message"};
             $this->replyToken = $jsonObj->{"events"}[0]->{"replyToken"};
         }
@@ -51,18 +52,25 @@ class Bot {
     {
         try {
             $messageData;
-            $keyTemp = -1;
-            foreach ($this->hitWords as $key => $val) {
-                if ($this->message->{"text"} == $val) {
-                    $messageData = $this->getMessageData($key + 1);
-                    $keyTemp = $key;
-                    break;
+            // 送られてきたデータがテキスト形式
+            if ($this->message->{"type"} === "text") {
+                $keyTemp = -1;
+                foreach ($this->hitWords as $key => $val) {
+                    if ($this->message->{"text"} == $val) {
+                        $messageData = $this->getMessageData($key + 1);
+                        $keyTemp = $key;
+                        break;
+                    }
+                }
+                if ($keyTemp === -1) {
+                    $messageData = $this->getMessageData(99);
                 }
             }
-            if ($keyTemp === -1) {
-                $messageData = $this->getMessageData(99);
+            // 送られてきたデータがテキスト形式以外
+            else {
+                $messageData = $this->getMessageData(0);
             }
-            error_log(print_r($messageData, true));
+            error_log(print_r($messageData, true));  // 送り返すデータチェック
             $this->response = [
                 'replyToken' => $this->replyToken,
                 'messages' => [$messageData]
@@ -109,6 +117,12 @@ class Bot {
         try {
             $messageData = array();
             switch($msgNo) {
+                case 0:
+                    $messageData = [
+                        'type' => 'text',
+                        'text' => 'ごめんね、私、文章以外はわからないんだ'
+                    ];
+                    return $messageData;
                 case 1:
                     $messageData = [
                         'type' => 'template',
